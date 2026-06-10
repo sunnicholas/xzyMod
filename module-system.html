@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统管理</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f8fafc; color: #1e293b; padding: 30px; line-height: 1.8; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #475569, #64748b); color: white; padding: 35px; border-radius: 12px; margin-bottom: 28px; text-align: center; }
+        .header h1 { font-size: 26px; margin-bottom: 6px; }
+        .card { background: white; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 20px; color: #334155; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid #64748b; }
+        .card h3 { font-size: 16px; color: #334155; margin: 18px 0 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #f8fafc; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; overflow-x: auto; white-space: pre-wrap; line-height: 1.7; margin: 10px 0; }
+        .info-box { background: #f8fafc; border-left: 4px solid #64748b; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+    <h1>⚙️ 系统管理</h1>
+    <div style="font-size:14px;opacity:0.85;">xzy-system 模块：用户/角色/菜单/部门/字典/配置/通知/公司/企微</div>
+</div>
+
+<div class="card">
+    <h2>1. 模块综述</h2>
+    <p>系统管理模块（<code>xzy-system</code>）基于 RuoYi 3.8.9 系统管理能力扩展，覆盖标准 RBAC 权限管理、数据字典、参数配置、通知公告、操作日志等基础设施功能，同时扩展了公司信息管理、企业微信消息管理等业务配套功能。</p>
+    <div class="info-box">
+        <strong>📌 代码模块：</strong><code>xzy-system</code><br>
+        <strong>📌 Controller 路径：</strong><code>xzy-admin/.../web/controller/system/</code>（约 16 个 Controller）<br>
+        <strong>📌 前端页面：</strong><code>src/views/system/</code>（11 个子模块）
+    </div>
+</div>
+
+<div class="card">
+    <h2>2. 功能清单</h2>
+    <table>
+        <tr><th>功能</th><th>前端页面</th><th>后端 Controller</th><th>权限标识</th></tr>
+        <tr>
+            <td>用户管理</td>
+            <td><code>views/system/user/</code></td>
+            <td><code>SysUserController</code></td>
+            <td><code>system:user:list</code></td>
+        </tr>
+        <tr>
+            <td>角色管理</td>
+            <td><code>views/system/role/</code></td>
+            <td><code>SysRoleController</code></td>
+            <td><code>system:role:list</code></td>
+        </tr>
+        <tr>
+            <td>菜单管理</td>
+            <td><code>views/system/menu/</code></td>
+            <td><code>SysMenuController</code></td>
+            <td><code>system:menu:list</code></td>
+        </tr>
+        <tr>
+            <td>部门管理</td>
+            <td><code>views/system/dept/</code></td>
+            <td><code>SysDeptController</code></td>
+            <td><code>system:dept:list</code></td>
+        </tr>
+        <tr>
+            <td>岗位管理</td>
+            <td><code>views/system/post/</code></td>
+            <td><code>SysPostController</code></td>
+            <td><code>system:post:list</code></td>
+        </tr>
+        <tr>
+            <td>字典管理</td>
+            <td><code>views/system/dict/</code></td>
+            <td><code>SysDictTypeController</code> / <code>SysDictDataController</code></td>
+            <td><code>system:dict:list</code></td>
+        </tr>
+        <tr>
+            <td>参数配置</td>
+            <td><code>views/system/config/</code></td>
+            <td><code>SysConfigController</code></td>
+            <td><code>system:config:list</code></td>
+        </tr>
+        <tr>
+            <td>通知公告</td>
+            <td><code>views/system/notice/</code></td>
+            <td><code>SysNoticeController</code></td>
+            <td><code>system:notice:list</code></td>
+        </tr>
+        <tr>
+            <td>公司管理</td>
+            <td><code>views/system/sysCompany/</code></td>
+            <td><code>SysCompanyController</code></td>
+            <td><code>system:company:list</code></td>
+        </tr>
+        <tr>
+            <td>企微消息</td>
+            <td><code>views/system/sysCorpWxMessage/</code></td>
+            <td><code>SysCorpWxMessageController</code></td>
+            <td><code>system:corpwx:list</code></td>
+        </tr>
+        <tr>
+            <td>企微记录</td>
+            <td><code>views/system/sysCorpWxRecord/</code></td>
+            <td><code>SysCorpWxRecordController</code></td>
+            <td><code>system:corpwx:list</code></td>
+        </tr>
+        <tr>
+            <td>个人中心</td>
+            <td><code>views/system/user/profile/</code></td>
+            <td><code>SysProfileController</code></td>
+            <td><code>system:user:edit</code></td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>3. RBAC 权限模型</h2>
+    <div class="code-box">用户 ──┬── 岗位 (sys_post)
+          ├── 部门 (sys_dept)
+          └── 角色 (sys_role) ── 菜单 (sys_menu)
+               └── 权限标识 (perms)
+                   如: measure:msEntrustTask:list
+                   system:user:edit
+                   crm:crmCustomer:add
+
+权限判断：@PreAuthorize("@ss.hasPermi('xxx:xxx:xxx')")
+按钮级： v-hasPermi="['xxx:xxx:xxx']"</div>
+</div>
+
+<div class="card">
+    <h2>4. 登录流程</h2>
+    <div class="code-box">POST /login  →  SysLoginController.ajaxLogin()
+1. 验证码校验 (CaptchaConfig/Kaptcha)
+2. 用户密码校验 (Spring Security AuthenticationManager)
+3. 生成 Token (TokenService.createToken())
+4. 返回 token / 用户信息 / 权限列表
+
+GET /getInfo  → 获取用户信息 + 角色 + 权限
+GET /getRouters → 动态路由（前端根据路由生成菜单）
+
+登录支持：
+- 账号密码登录
+- 企业微信扫码登录
+- 微信扫码登录 (uuidLogin)</div>
+</div>
+
+<div class="card">
+    <h2>5. 扩展：公司信息管理</h2>
+    <p>公司管理（<code>sys_company</code>）是系统管理模块的扩展，管理检测机构自身的基础信息，包括公司名称、地址、联系方式、资质信息等。在证书/报告中作为出具机构信息展现。</p>
+</div>
+
+</div>
+</body>
+</html>

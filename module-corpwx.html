@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业微信集成</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f8fafc; color: #1e293b; padding: 30px; line-height: 1.8; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #07c160, #06ad56); color: white; padding: 35px; border-radius: 12px; margin-bottom: 28px; text-align: center; }
+        .header h1 { font-size: 26px; margin-bottom: 6px; }
+        .card { background: white; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 20px; color: #065f46; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid #07c160; }
+        .card h3 { font-size: 16px; color: #334155; margin: 18px 0 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #f8fafc; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; overflow-x: auto; white-space: pre-wrap; line-height: 1.7; margin: 10px 0; }
+        .info-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .api-item { display: flex; align-items: flex-start; padding: 8px 14px; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+        .api-method { font-weight: 700; font-size: 12px; padding: 3px 10px; border-radius: 4px; color: white; min-width: 52px; text-align: center; flex-shrink: 0; }
+        .method-get { background: #10b981; } .method-post { background: #3b82f6; }
+        .api-url { font-family: 'Consolas', monospace; font-size: 13px; color: #1e40af; flex: 1; word-break: break-all; }
+        .api-desc { color: #64748b; font-size: 13px; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+    <h1>💬 企业微信集成</h1>
+    <div style="font-size:14px;opacity:0.85;">企微登录 · 消息推送 · 同步通讯录 · 微信公众号</div>
+</div>
+
+<div class="card">
+    <h2>1. 集成总览</h2>
+    <p>系统深度集成企业微信（WeCom）能力，同时支持微信公众号消息：</p>
+    <table>
+        <tr><th>功能</th><th>说明</th><th>代码位置</th></tr>
+        <tr>
+            <td>企微扫码登录</td>
+            <td>用户通过企业微信扫码直接登录系统</td>
+            <td><code>com.xzy.common.corpwx</code> + <code>CorpWxController</code></td>
+        </tr>
+        <tr>
+            <td>企微消息推送</td>
+            <td>检测进度通知、审核通知等通过企微应用消息推送</td>
+            <td><code>ICorpWeChatService</code> / <code>SysCorpWxMessageService</code></td>
+        </tr>
+        <tr>
+            <td>企微消息记录</td>
+            <td>记录所有已发送的企微消息，支持查看回执</td>
+            <td><code>SysCorpWxRecordService</code></td>
+        </tr>
+        <tr>
+            <td>微信公众号</td>
+            <td>接收微信用户消息，提供证书查询等服务</td>
+            <td><code>WxController</code></td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>2. 企业微信扫码登录流程</h2>
+    <div class="code-box">前端：用户点击"企微登录" → 打开企微二维码页
+后台：CorpWxController 处理 OAuth2 回调
+      1. 获取 code
+      2. 通过企微 API 换取 userId
+      3. 根据 userId 查找/创建本地用户
+      4. 生成 JWT token
+      5. 重定向到前端首页（携带 token）
+
+调用链路:
+GET /corp/wx/login     → 跳转企微授权页
+GET /corp/wx/callback  → OAuth2 回调处理
+→ userService.uuidLogin() → 生成 token</div>
+</div>
+
+<div class="card">
+    <h2>3. 消息推送</h2>
+    <div class="code-box">消息推送服务: ICorpWeChatService
+实现: CorpWeChatServiceImpl
+
+推送场景:
+1. 委托单审核通知 → 通知业务员
+2. 证书审核通知   → 通知编制人
+3. 任务分配通知   → 通知检测员
+4. 样品签收通知   → 通知送检人
+
+数据表:
+sys_corp_wx_message  → 消息内容/接收人/状态
+sys_corp_wx_record   → 发送记录/回执状态</div>
+</div>
+
+<div class="card">
+    <h2>4. 配置说明</h2>
+    <p>企业微信相关配置在 <code>application-dev.yml</code>（服务器）或 <code>application-local.yml</code>（本地开发，已 .gitignore）中。</p>
+    <table>
+        <tr><th>配置项</th><th>说明</th><th>获取方式</th></tr>
+        <tr><td><code>workWechat.corpId</code></td><td>企业 ID</td><td>企微管理后台「我的企业」→ 企业信息</td></tr>
+        <tr><td><code>workWechat.appAgentId</code></td><td>应用 AgentId</td><td>企微管理后台「应用管理」→ 自建应用</td></tr>
+        <tr><td><code>workWechat.appSecret</code></td><td>应用 Secret</td><td>企微管理后台「应用管理」→ 自建应用 → 查看 Secret</td></tr>
+        <tr><td><code>wechat.appid</code></td><td>微信公众号 AppID</td><td>微信公众号后台「开发」→ 基本配置</td></tr>
+        <tr><td><code>wechat.secret</code></td><td>微信公众号 Secret</td><td>微信公众号后台「开发」→ 基本配置</td></tr>
+    </table>
+    <div class="warn-box">
+        <strong>⚠️ 注意：</strong><br>
+        • 企业微信 Secret 和公众号 Secret <strong>不应以明文形式提交到 git 仓库</strong>（当前 dev 和 local 配置中存在明文，后续应迁移到环境变量或密钥管理服务）<br>
+        • 本地开发使用自己的测试企微应用，不要用线上应用的 Secret<br>
+        • 回调地址必须与企微管理后台配置的 <code>redirect-url</code> 一致
+    </div>
+    <div class="code-box"># application-local.yml 中的真实配置示例（值已脱敏）
+workWechat:
+  corpId: wwcd5e975979ae9944      # 企业 ID：可从企微后台获取
+  appAgentId: 1000024             # 应用 AgentId
+  appSecret: xxxxxx               # 找负责人获取，不写在公开文档中
+  redirect-url: https://lims.xiziyi.cn/corp/wx/callback</div>
+</div>
+
+</div>
+</body>
+</html>

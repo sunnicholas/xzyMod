@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文件操作详解</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f8fafc; color: #1e293b; padding: 30px; line-height: 1.8; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #0f766e, #14b8a6); color: white; padding: 35px; border-radius: 12px; margin-bottom: 28px; text-align: center; }
+        .header h1 { font-size: 26px; margin-bottom: 6px; }
+        .card { background: white; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 20px; color: #0f766e; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid #14b8a6; }
+        .card h3 { font-size: 16px; color: #334155; margin: 18px 0 10px; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; overflow-x: auto; white-space: pre-wrap; line-height: 1.7; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #f8fafc; }
+        .info-box { background: #f0fdfa; border-left: 4px solid #14b8a6; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .warn-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .danger-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-right: 4px; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; } .tag-yellow { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+    <h1>📁 文件操作详解</h1>
+    <div style="font-size:14px;opacity:0.85;">路径体系 | 上传/下载 | Word/Excel编辑 | PDF转换 | PageOffice</div>
+</div>
+
+<!-- ============ 路径体系 ============ -->
+<div class="card">
+    <h2>1. 文件存储路径体系</h2>
+    <p>所有文件存储由 <code>com.xzy.common.config.XiziYiConfig</code> 统一管理，根路径由 <code>xzy.profile</code> 配置：</p>
+    <table>
+        <tr><th>环境</th><th>配置文件</th><th>profile 值</th></tr>
+        <tr><td>macOS 本地开发</td><td><code>application-local.yml</code>（已 .gitignore）</td><td><code>/Users/sunnicholas/uploadPath</code></td></tr>
+        <tr><td>Ubuntu 服务器</td><td><code>application-dev.yml</code></td><td><code>/home/lims/uploadPath</code></td></tr>
+    </table>
+    <p>XiziYiConfig 按业务类型生成 16 个子目录（见 module-architecture 文档）。此外，部分业务 Service 在代码中自定义了更深层的路径：</p>
+    <table>
+        <tr><th>业务文件</th><th>存储路径（相对于 profile）</th><th>定义位置</th></tr>
+        <tr><td>委托单 Word/PDF</td><td><code>/entrust/{entrustId}/委托单.docx</code></td><td>MsEntrustTaskServiceImpl</td></tr>
+        <tr><td>证书 Word/PDF</td><td><code>/cert/{entrustId}/{allotId}/证书.docx</code></td><td>TestTaskAllotController</td></tr>
+        <tr><td>记录 Excel</td><td><code>/record/{entrustId}/{allotId}/原始记录.xlsx</code></td><td>PageOffice 保存回调</td></tr>
+    </table>
+    <div class="info-box">
+        <strong>注意：</strong>entrust/、cert/、record/ 目录名是在 Service 代码中硬编码的，<strong>不是</strong> XiziYiConfig 生成。<br>
+        如需新增业务文件类型，优先使用 XiziYiConfig 已有的子目录，而非自定义新目录。
+    </div>
+</div>
+
+<!-- ============ 文件上传 ============ -->
+<div class="card">
+    <h2>2. 文件上传（通用）</h2>
+    <p>入口：<code>CommonController</code>（<code>/common/**</code>），核心：<code>FileUploadUtils.upload()</code></p>
+    <table>
+        <tr><th>接口</th><th>说明</th><th>存储目录</th></tr>
+        <tr><td><code>POST /common/upload</code></td><td>通用文件上传</td><td><code>{profile}/upload/</code></td></tr>
+        <tr><td><code>POST /common/uploads</code></td><td>批量文件上传</td><td><code>{profile}/upload/</code></td></tr>
+        <tr><td><code>POST /common/uploadSign</code></td><td>电子签名上传</td><td><code>{profile}/sign/</code></td></tr>
+        <tr><td><code>POST /common/uploadOriginal</code></td><td>原始记录模板上传</td><td><code>{profile}/original/</code></td></tr>
+        <tr><td><code>POST /common/uploadOriginalXcImg</code></td><td>现场检测图片上传</td><td><code>{profile}/original/xcImg/</code></td></tr>
+        <tr><td><code>POST /common/uploadOriginalSjImg</code></td><td>送检图片上传</td><td><code>{profile}/original/sjImg/</code></td></tr>
+        <tr><td><code>POST /common/uploadCert</code></td><td>证书模板上传</td><td><code>{profile}/cert/</code></td></tr>
+        <tr><td><code>POST /common/uploadCusCfm</code></td><td>客户确认单上传</td><td><code>{profile}/cuscfm/</code></td></tr>
+    </table>
+    <p>文件上传逻辑详情，请参考 <code>module-file-upload.html</code>。</p>
+</div>
+
+<!-- ============ PageOffice ============ -->
+<div class="card">
+    <h2>3. PageOffice 在线编辑</h2>
+    <p>配置：<code>pageoffice.port: 8090</code>，前端组件在 <code>src/components/pageoffice/</code> 目录。</p>
+    <table>
+        <tr><th>功能</th><th>后端端点</th><th>前端组件</th></tr>
+        <tr><td>Word 在线编辑</td><td><code>GET /office/api/word</code></td><td><code>ZSadd.vue / ZSupdate.vue</code></td></tr>
+        <tr><td>Word 只读预览</td><td><code>GET /office/api/viewWord</code></td><td>—</td></tr>
+        <tr><td>Word 书签列表</td><td><code>GET /office/api/openWordTag</code></td><td>—</td></tr>
+        <tr><td>Word 书签回显</td><td><code>GET /office/api/openWordEchoTag</code></td><td>—</td></tr>
+        <tr><td>Excel 在线编辑</td><td><code>GET /office/api/excel</code></td><td><code>JLadd.vue / JLupdate.vue</code></td></tr>
+        <tr><td>Excel 只读查看</td><td><code>GET /office/api/excelView</code></td><td>—</td></tr>
+        <tr><td>Excel 区域只读</td><td><code>GET /office/api/recordEditExcel</code></td><td>保护表头/公式</td></tr>
+    </table>
+
+    <div class="warn-box">
+        <strong>⚠️ PageOffice 常见坑：</strong><br>
+        • JDK 兼容：PageOffice 在 JDK 8 较稳定，JDK 17 需确认已安装对应版本（当前项目已适配）<br>
+        • Linux 需安装 libstdc++: <code>apt install libstdc++6</code><br>
+        • 前端 PageOffice 组件 <strong>不能跨域</strong>，需同源访问<br>
+        • 文件路径需要完整的绝对路径，<code>posyspath</code> 配置必须正确
+    </div>
+</div>
+
+<!-- ============ Aspose 操作 ============ -->
+<div class="card">
+    <h2>4. Aspose.Words / Spire.Xls 文档操作</h2>
+    <p>JAR 包在 <code>xzy-admin/src/main/resources/jar/</code> 目录下，通过 pom.xml 中 <code>system scope</code> 引用：</p>
+    <table>
+        <tr><th>JAR 包</th><th>用途</th><th>许可证</th></tr>
+        <tr><td><code>aspose-words-15.8.0.jar</code></td><td>Word 创建/编辑/转PDF</td><td><code>license.xml</code></td></tr>
+        <tr><td><code>aspose-cells-8.5.2.jar</code></td><td>Excel 转 PDF</td><td><code>license.xml</code></td></tr>
+        <tr><td><code>Spire.Xls.jar</code></td><td>Excel 操作</td><td>免费版（有行数限制）</td></tr>
+    </table>
+
+    <h3>4.1 证书图片合成（核心）</h3>
+    <p><code>TestTaskAllotController.uploadCertImgBatch()</code>：将检测设备图片合成到证书 Word 中</p>
+    <div class="code-box">// 传参：allotId + certFilePath + deviceTag(书签名) + files[](图片)
+// 流程：
+1. 通过 Aspose.Words 打开 Word 模板
+2. DocumentBuilder.moveToBookmark(deviceTag) 定位书签
+3. DocumentBuilder.insertImage(imgPath) 插入图片
+4. document.save(certFilePath) 覆盖保存
+5. 可选：doc.save("证书.pdf", SaveFormat.PDF) 转 PDF</div>
+
+    <h3>4.2 Word ↔ PDF 转换</h3>
+    <div class="code-box">ImageToPdfUtil / ImageToPdfUtils  → 图片转PDF
+ExcelToPdfUtil / ExcelToPdfUtils  → Excel转PDF（Aspose.Cells）
+HtmlToImageUtil                   → HTML转图片（证书预览）</div>
+
+    <div class="warn-box">
+        <strong>⚠️ Aspose 水印问题：</strong><br>
+        如果生成的文件出现评估水印，检查 <code>license.xml</code>：<br>
+        • 文件位置：<code>xzy-admin/src/main/resources/license.xml</code><br>
+        • 加载点：<code>LimsApplication.java</code> <code>@PostConstruct initLicense()</code><br>
+        • 许可证过期会导致全部文件带水印，不可用于正式报告
+    </div>
+</div>
+
+<!-- ============ 文件下载 ============ -->
+<div class="card">
+    <h2>5. 文件下载与访问</h2>
+    <p><code>/profile/**</code> 为虚拟路径，由 <code>ResourcesConfig</code> 映射到 <code>file:{profile}/</code>：</p>
+    <div class="code-box">// 前端访问
+this.$download.name(fileName)    // 指定文件名下载
+this.$download.resource(url)     // 下载服务器资源
+this.$download.zip(url)          // 下载 zip 包
+
+// 后端下载端点
+GET /common/download?fileName={filename}&delete={true|false}</div>
+</div>
+
+<!-- ============ 问题排查 ============ -->
+<div class="card">
+    <h2>6. 常见文件操作问题排查</h2>
+    <table>
+        <tr><th>现象</th><th>原因</th><th>排查步骤</th></tr>
+        <tr><td>Aspose 文件有水印</td><td>license.xml 不正确或过期</td><td>检查 <code>resources/license.xml</code> 是否存在；查看启动日志中的 license 加载信息</td></tr>
+        <tr><td>PageOffice 无法打开</td><td>模板路径不对 / JDK 不兼容</td><td>检查数据库 <code>template_path</code> 字段指向的文件是否存在；检查 JDK 版本和 PageOffice 版本匹配</td></tr>
+        <tr><td>上传文件找不到</td><td>profile 配置不对或磁盘不足</td><td>确认 <code>xzy.profile</code> 指向的路径有读写权限和空间；确认数据库存储的是相对路径 <code>/profile/...</code></td></tr>
+        <tr><td>图片不显示</td><td>路径不对或权限不足</td><td>检查 Linux 文件权限：<code>chmod -R 755 {profile}</code>；检查 <code>/profile/</code> 映射是否正确</td></tr>
+        <tr><td>Word 书签找不到</td><td>模板中未插入对应书签</td><td>用 Word 打开模板，检查书签名称是否与代码中 <code>deviceTag</code> 一致</td></tr>
+    </table>
+
+    <div class="danger-box">
+        <strong>🚫 禁区：</strong><br>
+        • 不要修改 <code>ResourcesConfig</code> 中的 <code>/profile/**</code> 映射（改后所有文件 URL 会 404）<br>
+        • 不要在业务代码中写死路径分隔符，使用 <code>File.separator</code> 或 <code>Path.of()</code><br>
+        • 不要在生产环境修改或删除 <code>license.xml</code>
+    </div>
+</div>
+
+</div>
+</body>
+</html>

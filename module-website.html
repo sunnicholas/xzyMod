@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>官网管理</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f8fafc; color: #1e293b; padding: 30px; line-height: 1.8; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #1d4ed8, #2563eb); color: white; padding: 35px; border-radius: 12px; margin-bottom: 28px; text-align: center; }
+        .header h1 { font-size: 26px; margin-bottom: 6px; }
+        .card { background: white; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 20px; color: #1e3a8a; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #f8fafc; }
+        .api-item { display: flex; align-items: flex-start; padding: 10px 14px; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+        .api-method { font-weight: 700; font-size: 12px; padding: 3px 10px; border-radius: 4px; color: white; min-width: 52px; text-align: center; flex-shrink: 0; }
+        .method-get { background: #10b981; } .method-post { background: #3b82f6; }
+        .api-url { font-family: 'Consolas', monospace; font-size: 13px; color: #1e40af; flex: 1; }
+        .api-desc { color: #64748b; font-size: 13px; flex-shrink: 0; }
+        .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+    <h1>🌐 官网管理</h1>
+    <div style="font-size:14px;opacity:0.85;">对外展示：公司信息、服务项目、通知公告、证书验证、防伪码查询</div>
+</div>
+
+<div class="card">
+    <h2>1. 模块综述</h2>
+    <p>官网管理模块管理对外展示的网站内容（公司基本信息、服务项目、通知公告等），同时提供面向公众的证书真伪验证和防伪码扫码查询功能。</p>
+    <div class="info-box">
+        <strong>📌 前端页面：</strong><code>views/website/</code>（10 个子模块：轮播图、公司信息、证书展示、联系我们、合作单位、核心团队、发展历程、公告、在线留言、服务项目）<br>
+        <strong>📌 防伪码移动端：</strong><code>views/mobile/antiFakeCode/index.vue</code><br>
+        <strong>📌 证书验证：</strong><code>views/businessinquiry/certificateverification/index.vue</code>
+    </div>
+</div>
+
+<div class="card">
+    <h2>2. 模块清单</h2>
+    <table>
+        <tr><th>模块</th><th>前端API</th><th>前端页面</th><th>说明</th></tr>
+        <tr>
+            <td>公司信息</td>
+            <td><code>api/website/website.js</code></td>
+            <td><code>views/website/siteCompanyInfo/index.vue</code></td>
+            <td>官网展示的公司基本信息</td>
+        </tr>
+        <tr>
+            <td>轮播图</td>
+            <td><code>api/website/website.js</code></td>
+            <td><code>views/website/siteCarousel/index.vue</code></td>
+            <td>官网首页轮播广告图</td>
+        </tr>
+        <tr>
+            <td>通知公告</td>
+            <td>—</td>
+            <td><code>views/website/siteNotices/index.vue</code></td>
+            <td>检测公告、新闻发布</td>
+        </tr>
+        <tr>
+            <td>服务项目</td>
+            <td>—</td>
+            <td><code>views/website/siteServiceItem/index.vue</code></td>
+            <td>展示检测/校准服务范围</td>
+        </tr>
+        <tr>
+            <td>证书展示</td>
+            <td>—</td>
+            <td><code>views/website/siteCertificate/index.vue</code></td>
+            <td>官网展示的资质证书</td>
+        </tr>
+        <tr>
+            <td>联系我们</td>
+            <td>—</td>
+            <td><code>views/website/siteContactUs/index.vue</code></td>
+            <td>联系方式、地图位置</td>
+        </tr>
+        <tr>
+            <td>合作单位</td>
+            <td>—</td>
+            <td><code>views/website/sitePartner/index.vue</code></td>
+            <td>合作机构/客户展示</td>
+        </tr>
+        <tr>
+            <td>核心团队</td>
+            <td>—</td>
+            <td><code>views/website/siteTeam/index.vue</code></td>
+            <td>团队介绍</td>
+        </tr>
+        <tr>
+            <td>发展历程</td>
+            <td>—</td>
+            <td><code>views/website/siteHistory/index.vue</code></td>
+            <td>公司大事记时间线</td>
+        </tr>
+        <tr>
+            <td>在线留言</td>
+            <td>—</td>
+            <td><code>views/website/siteMessage/index.vue</code></td>
+            <td>访客留言管理</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>3. 防伪码与证书验证</h2>
+    <h3>3.1 防伪码管理</h3>
+    <p>系统在证书生成时自动生成防伪二维码，支持移动端扫码查询证书真伪。</p>
+    <div class="api-item"><span class="api-method method-get">GET</span><span class="api-url">/website/antiFakeCode/list</span><span class="api-desc">防伪码列表</span></div>
+    <div class="api-item"><span class="api-method method-post">POST</span><span class="api-url">/website/antiFakeCode</span><span class="api-desc">生成防伪码</span></div>
+    <div class="api-item"><span class="api-method method-get">GET</span><span class="api-url">/antiFakeCode/getAllotInfo</span><span class="api-desc">移动端扫码查询（公开接口）</span></div>
+
+    <h3>3.2 证书验证</h3>
+    <p>公众可通过官网输入证书编号查询证书真实性和检测结果。</p>
+    <div class="api-item"><span class="api-method method-get">GET</span><span class="api-url">/website/certificateVerification/list</span><span class="api-desc">证书验证列表（后台管理）</span></div>
+    <div class="api-item"><span class="api-method method-get">GET</span><span class="api-url">/website/certificateVerification/verify</span><span class="api-desc">验证证书真伪（公开查询）</span></div>
+</div>
+</div>
+</body>
+</html>

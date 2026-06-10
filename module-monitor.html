@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统监控</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f8fafc; color: #1e293b; padding: 30px; line-height: 1.8; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #0891b2, #06b6d4); color: white; padding: 35px; border-radius: 12px; margin-bottom: 28px; text-align: center; }
+        .header h1 { font-size: 26px; margin-bottom: 6px; }
+        .card { background: white; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 20px; color: #0e7490; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid #0891b2; }
+        .card h3 { font-size: 16px; color: #334155; margin: 18px 0 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #f8fafc; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; overflow-x: auto; white-space: pre-wrap; line-height: 1.7; margin: 10px 0; }
+        .info-box { background: #ecfeff; border-left: 4px solid #06b6d4; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .api-item { display: flex; align-items: flex-start; padding: 8px 14px; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+        .api-method { font-weight: 700; font-size: 12px; padding: 3px 10px; border-radius: 4px; color: white; min-width: 52px; text-align: center; flex-shrink: 0; }
+        .method-get { background: #10b981; } .method-post { background: #3b82f6; }
+        .api-url { font-family: 'Consolas', monospace; font-size: 13px; color: #1e40af; flex: 1; word-break: break-all; }
+        .api-desc { color: #64748b; font-size: 13px; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+    <h1>📊 系统监控</h1>
+    <div style="font-size:14px;opacity:0.85;">操作日志 / 登录日志 / 在线用户 / 定时任务 / 服务监控 / 缓存监控 / Druid 监控</div>
+</div>
+
+<div class="card">
+    <h2>1. 模块综述</h2>
+    <p>系统监控模块提供完整的运维监控能力，涵盖操作审计、登录审计、在线用户管理、定时任务调度、服务器健康检查、缓存管理以及数据库连接池监控。</p>
+    <div class="info-box">
+        <strong>📌 前端页面：</strong><code>src/views/monitor/</code>（7 个子模块）<br>
+        <strong>📌 后端路由前缀：</strong><code>/monitor/**</code><br>
+        <strong>📌 核心依赖：</strong>Quartz（定时任务）+ OSHI（系统监控）
+    </div>
+</div>
+
+<div class="card">
+    <h2>2. 功能清单</h2>
+    <table>
+        <tr><th>功能</th><th>前端页面</th><th>后端 Controller</th><th>说明</th></tr>
+        <tr>
+            <td>操作日志</td>
+            <td><code>views/monitor/operlog/</code></td>
+            <td><code>SysOperlogController</code></td>
+            <td>记录所有 @Log 注解的操作，支持导出和清理</td>
+        </tr>
+        <tr>
+            <td>登录日志</td>
+            <td><code>views/monitor/logininfor/</code></td>
+            <td><code>SysLogininforController</code></td>
+            <td>记录所有登录成功/失败日志</td>
+        </tr>
+        <tr>
+            <td>在线用户</td>
+            <td><code>views/monitor/online/</code></td>
+            <td><code>SysUserOnlineController</code></td>
+            <td>查看在线用户，支持强制下线</td>
+        </tr>
+        <tr>
+            <td>定时任务</td>
+            <td><code>views/monitor/job/</code></td>
+            <td><code>SysJobController</code></td>
+            <td>Quartz 任务 CRUD、触发、暂停、恢复</td>
+        </tr>
+        <tr>
+            <td>调度日志</td>
+            <td><code>views/monitor/job/log/</code></td>
+            <td><code>SysJobLogController</code></td>
+            <td>每次任务执行的日志记录</td>
+        </tr>
+        <tr>
+            <td>服务监控</td>
+            <td><code>views/monitor/server/</code></td>
+            <td><code>ServerController</code></td>
+            <td>CPU/内存/磁盘/JVM 信息（OSHI）</td>
+        </tr>
+        <tr>
+            <td>缓存监控</td>
+            <td><code>views/monitor/cache/</code></td>
+            <td><code>CacheController</code></td>
+            <td>Redis 缓存信息查询/清理</td>
+        </tr>
+        <tr>
+            <td>Druid 监控</td>
+            <td><code>views/monitor/druid/</code></td>
+            <td>内置 Servlet</td>
+            <td>数据库连接池监控页面</td>
+        </tr>
+    </table>
+    <div class="warn-box" style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;">
+        <strong>🚫 Druid 监控安全：</strong>Druid 监控页面 <code>/xzy-api/druid/</code> 登录密码在 <code>application-druid.yml</code> 中配置（本地默认 ruoyi/123456），<strong>线上环境必须修改密码</strong>，或通过防火墙限制内网访问。<br>
+        不要将线上 Druid 监控页暴露到公网。
+    </div>
+</div>
+
+<div class="card">
+    <h2>3. 操作日志（重点）</h2>
+    <p>通过 <code>@Log</code> 注解实现操作日志的 AOP 自动记录：</p>
+    <div class="code-box">// Controller 层用法
+@Log(title = "委托管理", businessType = BusinessType.INSERT)
+@PostMapping("/measure/msEntrustTask")
+public AjaxResult add(@RequestBody MsEntrustTask entity) { ... }
+
+// 会自动记录：操作人、IP、操作方法、耗时、请求参数、返回结果
+// 存储在: sys_oper_log 表</div>
+
+    <h3>业务类型枚举</h3>
+    <table>
+        <tr><th>BusinessType</th><th>说明</th></tr>
+        <tr><td>INSERT</td><td>新增</td></tr>
+        <tr><td>UPDATE</td><td>修改</td></tr>
+        <tr><td>DELETE</td><td>删除</td></tr>
+        <tr><td>GRANT</td><td>授权</td></tr>
+        <tr><td>EXPORT</td><td>导出</td></tr>
+        <tr><td>IMPORT</td><td>导入</td></tr>
+        <tr><td>FORCE</td><td>强退</td></tr>
+        <tr><td>CLEAN</td><td>清空</td></tr>
+        <tr><td>OTHER</td><td>其他</td></tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>4. 定时任务 (Quartz)</h2>
+    <p>代码模块：<code>xzy-quartz</code></p>
+    <table>
+        <tr><th>类/文件</th><th>说明</th></tr>
+        <tr><td><code>SysJobController</code></td><td>任务管理 CRUD、状态切换</td></tr>
+        <tr><td><code>SysJobLogController</code></td><td>执行日志查看</td></tr>
+        <tr><td><code>sys_job</code> 表</td><td>任务定义（cron 表达式、调用目标方法）</td></tr>
+        <tr><td><code>sys_job_log</code> 表</td><td>任务执行记录</td></tr>
+    </table>
+    <div class="code-box">-- 任务定义样例
+INSERT INTO sys_job (job_name, job_group, invoke_target, cron_expression, status)
+VALUES ('同步数据', 'SYSTEM', 'syncTask.syncData()', '0 0 2 * * ?', '0');</div>
+</div>
+
+</div>
+</body>
+</html>

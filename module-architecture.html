@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>系统架构总览 · 接手手册</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f8fafc; color: #1e293b; padding: 30px; line-height: 1.8; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 35px; border-radius: 12px; margin-bottom: 28px; text-align: center; }
+        .header h1 { font-size: 26px; margin-bottom: 6px; }
+        .card { background: white; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 20px; color: #0f172a; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid #0f172a; }
+        .card h3 { font-size: 16px; color: #334155; margin: 18px 0 10px; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; overflow-x: auto; white-space: pre-wrap; line-height: 1.7; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #f8fafc; }
+        .info-box { background: #f1f5f9; border-left: 4px solid #0f172a; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .warn-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .danger-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .success-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-right: 4px; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; } .tag-purple { background: #ede9fe; color: #5b21b6; }
+        .tag-red { background: #fce7f3; color: #9d174d; } .tag-yellow { background: #fef3c7; color: #92400e; } .tag-gray { background: #f1f5f9; color: #475569; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <h1>系统架构总览 · 接手手册</h1>
+    <div style="font-size:14px;opacity:0.85;">环境搭建 | 启动流程 | 模块结构 | 核心配置 | 禁区清单</div>
+</div>
+
+<!-- ============ 接手第一步：环境搭建 ============ -->
+<div class="card">
+    <h2>0. 接手第一步：从 0 跑通项目</h2>
+
+    <h3>0.1 前置环境要求</h3>
+    <table>
+        <tr><th>工具</th><th>版本要求</th><th>验证命令</th></tr>
+        <tr><td>JDK</td><td>17（必须）</td><td><code>java -version</code></td></tr>
+        <tr><td>Maven</td><td>3.6+</td><td><code>mvn -version</code></td></tr>
+        <tr><td>MySQL</td><td>8.0.33+</td><td><code>mysql --version</code></td></tr>
+        <tr><td>Redis</td><td>任意版本，端口 36379</td><td><code>redis-cli -p 36379 ping</code></td></tr>
+        <tr><td>Node.js</td><td>14 - 18</td><td><code>node -v</code></td></tr>
+        <tr><td>npm</td><td>7+</td><td><code>npm -v</code></td></tr>
+    </table>
+
+    <h3>0.2 后端启动步骤</h3>
+    <div class="code-box"># 1. 初始化数据库
+# 创建数据库 lims，执行 lims122.sql（位于项目根目录）
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS lims DEFAULT CHARSET utf8mb4;"
+mysql -u root -p lims < /path/to/lims122.sql
+
+# 2. 启动 Redis（端口必须 36379）
+redis-server --port 36379 &
+
+# 3. 编译打包（首次编译较慢）
+cd xiziyi-lims-service/
+mvn clean install -DskipTests -T 4
+
+# 4. 启动后端（热启动模式，适合开发）
+mvn spring-boot:run -pl xzy-admin -am -Dspring-boot.run.profiles=local
+
+# 5. 验证后端是否启动成功
+curl http://localhost:30001/xzy-api/
+# → 返回 Swagger 重定向或 401（未登录），说明启动成功
+# Swagger UI: http://localhost:30001/xzy-api/doc.html
+# Druid 监控: http://localhost:30001/xzy-api/druid/</div>
+
+    <h3>0.3 前端启动步骤</h3>
+    <div class="code-box"># 1. 安装依赖
+cd xiziyi-lims-web/
+npm install --registry=https://registry.npmmirror.com
+
+# 2. 启动开发服务器
+npm run dev
+
+# 3. 浏览器访问
+# http://192.168.3.122:80/ 或 http://localhost:80/
+# 默认管理员账号: admin / admin123</div>
+
+    <h3>0.4 常见启动报错解决</h3>
+    <table>
+        <tr><th>报错</th><th>原因</th><th>解决</th></tr>
+        <tr><td><code>Access denied for user 'root'@'localhost'</code></td><td>数据库密码不对</td><td>检查 <code>application-druid.yml</code> 的 <code>spring.datasource.druid.master.password</code></td></tr>
+        <tr><td><code>Redis connection refused</code></td><td>Redis 未启动或端口不对</td><td>确认 Redis 端口为 <code>36379</code></td></tr>
+        <tr><td><code>Table 'lims.xx' doesn't exist</code></td><td>数据库未初始化</td><td>执行 <code>lims122.sql</code></td></tr>
+        <tr><td><code>Port 30001 already in use</code></td><td>端口被占用</td><td><code>lsof -i :30001 | kill</code> 或修改 <code>server.port</code></td></tr>
+        <tr><td><code>npm ERR! code EINTEGRITY</code></td><td>npm 缓存问题</td><td><code>rm -rf node_modules package-lock.json && npm install</code></td></tr>
+        <tr><td>PageOffice 无法打开文件</td><td>JDK 兼容性或路径不对</td><td>检查 <code>posyspath</code> 配置和模板文件是否存在</td></tr>
+        <tr><td>登录后 API 返回 401</td><td>Token 过期或 Redis 清空</td><td>重新登录，检查 Redis 连接</td></tr>
+    </table>
+</div>
+
+<!-- ============ 项目概览 ============ -->
+<div class="card">
+    <h2>1. 项目概览</h2>
+    <table>
+        <tr><th>属性</th><th>值</th></tr>
+        <tr><td>项目名称</td><td>西自仪云检测一体化平台 (xiziyi-lims)</td></tr>
+        <tr><td>项目基础</td><td>基于 RuoYi-Vue 3.8.9 深度定制</td></tr>
+        <tr><td>Group ID</td><td>com.xzy</td></tr>
+        <tr><td>版本</td><td>1.0.0（根 POM） / 3.8.9（前端 package.json）</td></tr>
+        <tr><td>服务端口</td><td>30001</td></tr>
+        <tr><td>上下文路径</td><td>/xzy-api</td></tr>
+        <tr><td>JDK 版本</td><td>17</td></tr>
+        <tr><td>数据库</td><td>MySQL 8.0.33（库名: lims）</td></tr>
+        <tr><td>官方网站</td><td>https://www.xiziyi.cn</td></tr>
+        <tr><td>最后更新时间</td><td>2026-05-29 16:40:45</td></tr>
+    </table>
+</div>
+
+<!-- ============ 技术栈 ============ -->
+<div class="card">
+    <h2>2. 技术栈</h2>
+    <table>
+        <tr><th>层级</th><th>技术</th><th>版本/说明</th></tr>
+        <tr><td>基础框架</td><td>Spring Boot</td><td>2.5.15</td></tr>
+        <tr><td>安全框架</td><td>Spring Security + JWT</td><td>5.7.14 + jjwt 0.9.1</td></tr>
+        <tr><td>ORM</td><td>MyBatis + MyBatis-Plus</td><td>Spring Boot Starter</td></tr>
+        <tr><td>数据库连接池</td><td>Alibaba Druid</td><td>1.2.23</td></tr>
+        <tr><td>缓存</td><td>Redis</td><td>Lettuce 连接池</td></tr>
+        <tr><td>API 文档</td><td>Swagger + Knife4j</td><td>2.9.2</td></tr>
+        <tr><td>前端框架</td><td>Vue 2.6.14 + Element UI 2.15.14</td><td>RuoYi 前端</td></tr>
+        <tr><td>在线 Office</td><td>PageOffice</td><td>北京卓正，端口 8090</td></tr>
+        <tr><td>Word 操作</td><td>Aspose.Words</td><td>15.8.0（jar 包在 xzy-admin/resources/jar/）</td></tr>
+        <tr><td>Excel 操作</td><td>Spire.Xls + Aspose.Cells</td><td>8.5.2</td></tr>
+        <tr><td>定时任务</td><td>Quartz</td><td>xzy-quartz 模块</td></tr>
+        <tr><td>系统监控</td><td>OSHI</td><td>6.8.3</td></tr>
+        <tr><td>三方集成</td><td>企业微信 + 微信公众号</td><td>登录/消息推送</td></tr>
+        <tr><td>代码生成器</td><td>Velocity（RuoYi 内置）</td><td>xzy-generator 模块</td></tr>
+    </table>
+</div>
+
+<!-- ============ 多模块架构 ============ -->
+<div class="card">
+    <h2>3. 多模块架构（10 个子模块）</h2>
+    <table>
+        <tr><th>模块</th><th>路径</th><th>说明</th><th>Controller 数</th></tr>
+        <tr><td><span class="tag tag-red">xzy-admin</span></td><td><code>xzy-admin/</code></td><td><strong>Web 启动层</strong>：LimsApplication + 全部 99 个 Controller</td><td>99</td></tr>
+        <tr><td><span class="tag tag-purple">xzy-framework</span></td><td><code>xzy-framework/</code></td><td><strong>框架核心</strong>：Spring Security + JWT + AOP + 多数据源</td><td>—</td></tr>
+        <tr><td><span class="tag tag-blue">xzy-system</span></td><td><code>xzy-system/</code></td><td>系统管理：用户/角色/菜单/字典/通知/公司/企微消息</td><td>17</td></tr>
+        <tr><td><span class="tag tag-green">xzy-measure</span></td><td><code>xzy-measure/</code></td><td><strong>计量检测核心</strong>：委托/任务/模板/证书/特种设备/外出</td><td>约 60</td></tr>
+        <tr><td><span class="tag tag-yellow">xzy-crm</span></td><td><code>xzy-crm/</code></td><td>客户关系管理：客户/样品/报价/发票/赠检</td><td>10</td></tr>
+        <tr><td><span class="tag tag-yellow">xzy-basics</span></td><td><code>xzy-basics/</code></td><td>基础数据：计量目录/项目/报价/编码规则/标签模板</td><td>11</td></tr>
+        <tr><td><span class="tag tag-yellow">xzy-quality</span></td><td><code>xzy-quality/</code></td><td>质量管理：技术依据/标准物质</td><td>2</td></tr>
+        <tr><td><span class="tag tag-gray">xzy-quartz</span></td><td><code>xzy-quartz/</code></td><td>定时任务：Quartz 调度</td><td>2</td></tr>
+        <tr><td><span class="tag tag-gray">xzy-generator</span></td><td><code>xzy-generator/</code></td><td>代码生成器：Velocity 模板</td><td>1</td></tr>
+        <tr><td><span class="tag tag-blue">xzy-common</span></td><td><code>xzy-common/</code></td><td>公共模块：XiziYiConfig/BaseEntity/AjaxResult/工具类</td><td>0（基类）</td></tr>
+    </table>
+    <div class="info-box">
+        <strong>关键理解：</strong><br>
+        • xzy-admin 是<strong>唯一启动模块</strong>，包含 LimsApplication.java 和全部 99 个 Controller<br>
+        • 业务模块（measure/crm/basics 等）<strong>只有 Domain/Mapper/Service，没有 Controller</strong>，所有 API 入口在 xzy-admin<br>
+        • xzy-common 是最底层依赖，所有模块都依赖它<br>
+        • xzy-framework 是运行框架（安全、AOP、配置），仅 xzy-admin 直接依赖
+    </div>
+</div>
+
+<!-- ============ 核心配置 ============ -->
+<div class="card">
+    <h2>4. 核心配置说明</h2>
+
+    <h3>4.1 配置文件层次（加载顺序）</h3>
+    <div class="code-box">application.yml       ← 公共配置（版本、端口、日志级别、上传限制等）
+  └─ application-druid.yml  ← 数据源配置（MySQL 连接、Druid 连接池）
+     └─ application-dev.yml  ← Ubuntu 服务器环境（.gitignore 中无此文件）
+     └─ application-local.yml ← macOS/Windows 本地开发（已加入 .gitignore）</div>
+
+    <h3>4.2 关键配置项</h3>
+    <table>
+        <tr><th>配置项</th><th>值</th><th>说明</th></tr>
+        <tr><td><code>server.port</code></td><td>30001</td><td>后端服务端口</td></tr>
+        <tr><td><code>server.servlet.context-path</code></td><td>/xzy-api</td><td>所有 API 前缀</td></tr>
+        <tr><td><code>spring.profiles.active</code></td><td>druid,local</td><td>本地加载顺序：druid → local</td></tr>
+        <tr><td><code>token.expireTime</code></td><td>360（分钟）</td><td>Token 过期时间</td></tr>
+        <tr><td><code>spring.servlet.multipart.max-file-size</code></td><td>1024MB</td><td>单文件上传上限</td></tr>
+        <tr><td><code>spring.servlet.multipart.max-request-size</code></td><td>2048MB</td><td>单次请求总大小上限</td></tr>
+        <tr><td><code>pageoffice.port</code></td><td>8090</td><td>PageOffice 服务端口</td></tr>
+    </table>
+
+    <h3>4.3 双环境 profile 配置</h3>
+    <table>
+        <tr><th>配置</th><th>本地 local（macOS）</th><th>服务器 dev（Ubuntu）</th></tr>
+        <tr><td>profile 路径</td><td><code>/Users/sunnicholas/uploadPath</code></td><td><code>/home/lims/uploadPath</code></td></tr>
+        <tr><td>日志路径</td><td><code>/Users/sunnicholas/lims/logs</code></td><td><code>/home/lims/logs</code></td></tr>
+        <tr><td>Redis 密码</td><td>无密码（localhost）</td><td>有密码（私密，见密码表）</td></tr>
+        <tr><td>数据库密码</td><td>123456（本地测试）</td><td>Xiziyi@88（见密码表）</td></tr>
+    </table>
+
+    <h3>4.4 数据库配置</h3>
+    <div class="code-box"># application-druid.yml
+spring:
+  datasource:
+    druid:
+      master:
+        url: jdbc:mysql://127.0.0.1:3306/lims?useUnicode=true&characterEncoding=utf8&useSSL=true&serverTimezone=GMT%2B8
+        username: root
+        # 密码：见下方密码表，不在代码中硬编码明文
+      # 从库已占位未启用（slave.enabled: false）
+
+# Druid 监控页面
+# 访问: http://localhost:30001/xzy-api/druid/
+# 账号: ruoyi / 密码: 123456（仅本地测试用）</div>
+
+    <div class="warn-box">
+        <strong>密码表（不外传，新接手人找负责人单独获取）：</strong><br>
+        • 本地数据库：root / 123456<br>
+        • 线上数据库：root / Xiziyi@88<br>
+        • 线上 Redis：127.0.0.1:36379 / 有密码<br>
+        • 企业微信 Secret：保存在环境配置文件中<br>
+        • 微信公众号 Secret：保存在环境配置文件中
+    </div>
+
+    <h3>4.5 文件存储路径体系（XiziYiConfig）</h3>
+    <p>配置类：<code>com.xzy.common.config.XiziYiConfig</code>，共 16 个路径方法：</p>
+    <table>
+        <tr><th>方法</th><th>相对路径</th><th>用途</th></tr>
+        <tr><td><code>getProfile()</code></td><td><code>{profile}/</code></td><td>根目录</td></tr>
+        <tr><td><code>getUploadPath()</code></td><td><code>{profile}/upload</code></td><td>通用文件上传</td></tr>
+        <tr><td><code>getSignPath()</code></td><td><code>{profile}/sign</code></td><td>电子签名</td></tr>
+        <tr><td><code>getOriginalPath()</code></td><td><code>{profile}/original</code></td><td>原始记录模板</td></tr>
+        <tr><td><code>getOriginalImgXcPath()</code></td><td><code>{profile}/original/xcImg</code></td><td>现场检测图片</td></tr>
+        <tr><td><code>getOriginalImgSjPath()</code></td><td><code>{profile}/original/sjImg</code></td><td>送检图片</td></tr>
+        <tr><td><code>getCertPath()</code></td><td><code>{profile}/cert</code></td><td>证书文件</td></tr>
+        <tr><td><code>getCertImgPath()</code></td><td><code>{profile}/certImg</code></td><td>证书图片</td></tr>
+        <tr><td><code>getCusCfmPath()</code></td><td><code>{profile}/cuscfm</code></td><td>客户确认单</td></tr>
+        <tr><td><code>getTemplatePath()</code></td><td><code>{profile}/template</code></td><td>模板文件</td></tr>
+        <tr><td><code>getDownloadPath()</code></td><td><code>{profile}/download/</code></td><td>文件下载</td></tr>
+        <tr><td><code>getImportPath()</code></td><td><code>{profile}/import</code></td><td>数据导入</td></tr>
+        <tr><td><code>getAvatarPath()</code></td><td><code>{profile}/avatar</code></td><td>用户头像</td></tr>
+        <tr><td><code>getBarCodePath()</code></td><td><code>{profile}/barcode/</code></td><td>条形码</td></tr>
+        <tr><td><code>getQRCodePath()</code></td><td><code>{profile}/qrcode/</code></td><td>防伪二维码</td></tr>
+        <tr><td><code>getBackup()</code></td><td><code>{profile}/backup</code></td><td>数据备份</td></tr>
+    </table>
+</div>
+
+<!-- ============ 禁区 ============ -->
+<div class="card">
+    <h2>5. 🚫 禁区清单（修改前必须确认）</h2>
+
+    <div class="danger-box">
+        <strong>🚫 禁区 1：xzy-framework/config/SecurityConfig.java</strong><br>
+        不要修改：白名单路径、密码编码器（BCryptPasswordEncoder）、JWT 过滤器链。<br>
+        后果：改了白名单可能导致登录页都打不开；改了密码编码器会导致所有用户密码失效。
+    </div>
+
+    <div class="danger-box">
+        <strong>🚫 禁区 2：application-druid.yml 的数据库连接</strong><br>
+        不要修改：<code>spring.datasource.druid.master.url</code>（除非改数据库地址）。<br>
+        不要修改：<code>spring.datasource.druid.master.password</code> 为明文写在 git 里的线上密码。<br>
+        线上密码通过私有渠道传递，<code>application-local.yml</code> 已加入 <code>.gitignore</code>。
+    </div>
+
+    <div class="danger-box">
+        <strong>🚫 禁区 3：XiziYiConfig.java 的路径方法</strong><br>
+        不要修改：<code>getProfile()</code> 返回路径（由 yml 配置）。<br>
+        不要新增/删除子路径方法，除非同步修改 CommonController 中的上传接口。<br>
+        不要硬编码路径字符串，必须通过 XiziYiConfig 的方法获取。
+    </div>
+
+    <div class="danger-box">
+        <strong>🚫 禁区 4：mybatis-plus 配置中的 mapper-locations</strong><br>
+        <code>classpath*:mapper/**/*Mapper.xml</code> — 不要修改这个扫描路径。<br>
+        XML 文件命名必须严格按 <code>XXXMapper.xml</code> 格式，否则不会被加载。
+    </div>
+
+    <div class="danger-box">
+        <strong>🚫 禁区 5：Tomcat 线程池配置</strong><br>
+        <code>server.tomcat.threads.max: 800</code> — 不要随意改大。<br>
+        当前值已贴近服务器资源上限，改大可能导致 OOM 或 CPU 耗尽。
+    </div>
+
+    <div class="warn-box">
+        <strong>⚠️ 其他需注意的配置：</strong><br>
+        • <code>token.secret</code> 在 yml 中为明文占位符，线上环境应使用更强的密钥<br>
+        • <code>swagger.enabled</code> 生产环境应设为 false，防止 API 泄露<br>
+        • <code>xss.enabled: true</code> 不要关闭，除非明确知道后果<br>
+        • <code>referer.enabled: false</code> 防盗链当前关闭，如需打开需统一配置 allowed-domains
+    </div>
+</div>
+
+<!-- ============ API 路由 ============ -->
+<div class="card">
+    <h2>6. API 路由规范</h2>
+    <table>
+        <tr><th>模块前缀</th><th>Controller 数</th><th>权限控制</th><th>说明</th></tr>
+        <tr><td><code>/system/**</code></td><td>17</td><td><code>@PreAuthorize</code></td><td>系统管理（用户/角色/菜单/字典等）</td></tr>
+        <tr><td><code>/monitor/**</code></td><td>6</td><td><code>@PreAuthorize</code></td><td>系统监控（操作日志/JOB/缓存等）</td></tr>
+        <tr><td><code>/measure/**</code></td><td>约 60</td><td><code>@PreAuthorize</code></td><td>计量检测核心业务</td></tr>
+        <tr><td><code>/crm/**</code></td><td>10</td><td><code>@PreAuthorize</code></td><td>客户关系管理</td></tr>
+        <tr><td><code>/basics/**</code></td><td>11</td><td><code>@PreAuthorize</code></td><td>基础数据管理</td></tr>
+        <tr><td><code>/quality/**</code></td><td>2</td><td><code>@PreAuthorize</code></td><td>质量管理</td></tr>
+        <tr><td><code>/common/**</code></td><td>2</td><td>部分公开</td><td>文件上传/下载/资源访问</td></tr>
+        <tr><td><code>/corp/wx/**</code></td><td>1</td><td>公开</td><td>企业微信登录回调</td></tr>
+        <tr><td><code>/app/**</code></td><td>2</td><td>Token 认证</td><td>移动端 API</td></tr>
+        <tr><td><code>/antiFakeCode/**</code></td><td>1</td><td>公开</td><td>防伪码查询（公开接口）</td></tr>
+    </table>
+</div>
+
+</div>
+</body>
+</html>
