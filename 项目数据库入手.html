@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目数据库入手报告 — 西自仪 LIMS</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif; line-height: 1.7; color: #1a1a2e; max-width: 1100px; margin: 0 auto; padding: 40px 24px; background: #f8f9fa; }
+  h1 { font-size: 28px; border-bottom: 3px solid #2563eb; padding-bottom: 12px; margin-bottom: 8px; color: #0f172a; }
+  .subtitle { color: #64748b; font-size: 15px; margin-bottom: 32px; }
+  h2 { font-size: 20px; margin-top: 36px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid #2563eb; color: #0f172a; }
+  h3 { font-size: 16px; margin-top: 24px; margin-bottom: 8px; color: #334155; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 14px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  th { background: #1e293b; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; }
+  tr:hover { background: #f1f5f9; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+  .tag-framework { background: #dbeafe; color: #1e40af; }
+  .tag-basics { background: #dcfce7; color: #166534; }
+  .tag-crm { background: #fef3c7; color: #92400e; }
+  .tag-measure { background: #f3e8ff; color: #6b21a8; }
+  .tag-quality { background: #fce7f3; color: #9d174d; }
+  .tag-common { background: #e0e7ff; color: #3730a3; }
+  .diagram { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 16px 0; font-family: "Courier New", monospace; font-size: 13px; line-height: 1.8; white-space: pre; overflow-x: auto; }
+  .summary-card { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+  .card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #2563eb; }
+  .card .num { font-size: 28px; font-weight: 700; color: #2563eb; }
+  .card .label { font-size: 13px; color: #64748b; margin-top: 4px; }
+  ul { padding-left: 20px; }
+  ul li { margin-bottom: 4px; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #1e293b; }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>项目数据库入手报告</h1>
+<div class="subtitle">西自仪 LIMS 实验室信息管理系统 — 模块 / 功能 / 数据库对应关系</div>
+
+<div class="summary-card">
+  <div class="card"><div class="num">3</div><div class="label">数据库 SQL 文件</div></div>
+  <div class="card"><div class="num">~110</div><div class="label">总数据表</div></div>
+  <div class="card"><div class="num">10</div><div class="label">后端 Maven 模块</div></div>
+  <div class="card"><div class="num">25+</div><div class="label">前端视图模块</div></div>
+</div>
+
+<h2>1. 项目架构概述</h2>
+<p>基于 <strong>若依框架（RuoYi）</strong> 的 <strong>LIMS（实验室信息管理系统）</strong>，采用 Maven 多模块 + Vue 2 前后端分离架构。数据库共 3 个 SQL 文件，约 110 张表，覆盖系统权限管理、计量检测全流程（委托→任务→检测→模板→证书→审核→归档）、客户关系管理、质量管理等业务。</p>
+
+<table>
+  <tr><th>层</th><th>技术栈</th><th>位置</th></tr>
+  <tr><td>后端</td><td>Spring Boot / MyBatis / Shiro / MySQL</td><td><code>xiziyi-lims-service/</code></td></tr>
+  <tr><td>前端</td><td>Vue 2 / Element UI / Router / Vuex</td><td><code>xiziyi-lims-web/</code></td></tr>
+  <tr><td>数据库</td><td>MySQL 5.7</td><td><code>info/sql/</code></td></tr>
+</table>
+
+<h2>2. 数据库文件清单</h2>
+<table>
+  <tr><th>SQL 文件</th><th>数据库</th><th>表数量</th><th>说明</th></tr>
+  <tr><td><code>ry_20240629.sql</code></td><td><code>ry</code></td><td>19</td><td>若依框架核心表：系统管理 / 权限 RBAC / 字典 / 日志 / 代码生成</td></tr>
+  <tr><td><code>lims20260305170424.sql</code></td><td><code>lims</code></td><td>~90</td><td>LIMS 业务表：计量检测全流程 / CRM / 质量 / 特种设备 / 模板证书</td></tr>
+  <tr><td><code>quartz.sql</code></td><td><code>ry</code></td><td>11</td><td>Quartz 定时任务调度框架表</td></tr>
+</table>
+
+<h2>3. 后端模块与数据库对应</h2>
+<table>
+  <tr><th>后端模块</th><th>核心职能</th><th>对应表前缀</th><th>标签</th></tr>
+  <tr><td><code>xzy-system</code></td><td>系统管理：用户/角色/菜单/部门/字典/日志</td><td><code>sys_*</code></td><td><span class="tag tag-framework">框架</span></td></tr>
+  <tr><td><code>xzy-basics</code></td><td>基础数据：编码规则 / 计量目录 / 报价 / 标签模板 / 外协</td><td><code>bas_*</code></td><td><span class="tag tag-basics">基础</span></td></tr>
+  <tr><td><code>xzy-crm</code></td><td>客户关系：客户 / 类别 / 规则 / 送检 / 发票 / 来样</td><td><code>crm_*</code></td><td><span class="tag tag-crm">CRM</span></td></tr>
+  <tr><td><code>xzy-measure</code></td><td>核心检测业务：委托 / 任务 / 检测 / 模板 / 证书 / 外检 / 特种设备</td><td><code>ms_*</code>, <code>test_*</code></td><td><span class="tag tag-measure">计量</span></td></tr>
+  <tr><td><code>xzy-quality</code></td><td>质量管理：计量标准 / 标准物质 / 技术依据</td><td><code>ms_measure_*</code>, <code>ms_standard_*</code>, <code>qua_*</code></td><td><span class="tag tag-quality">质量</span></td></tr>
+  <tr><td><code>xzy-generator</code></td><td>代码生成器</td><td><code>gen_*</code></td><td><span class="tag tag-framework">框架</span></td></tr>
+  <tr><td><code>xzy-quartz</code></td><td>Quartz 定时任务调度</td><td><code>QRTZ_*</code></td><td><span class="tag tag-framework">框架</span></td></tr>
+  <tr><td><code>xzy-admin</code></td><td>系统入口 / 安全配置 / CORS</td><td>—</td><td><span class="tag tag-common">公共</span></td></tr>
+  <tr><td><code>xzy-framework</code></td><td>Shiro 权限 / 拦截器 / 基础配置</td><td>—</td><td><span class="tag tag-common">公共</span></td></tr>
+  <tr><td><code>xzy-common</code></td><td>公共工具：POI / Redis / PDF / 文本处理</td><td>—</td><td><span class="tag tag-common">公共</span></td></tr>
+</table>
+
+<h2>4. 业务模块与数据表映射</h2>
+
+<h3>4.1 若依框架 — 系统权限管理（ry 库）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>组织架构</td><td><code>sys_dept</code></td><td>部门树，支持多级（深圳/长沙分公司 → 研发/市场/财务等）</td></tr>
+  <tr><td>用户管理</td><td><code>sys_user</code>, <code>sys_user_role</code>, <code>sys_user_post</code></td><td>用户基本信息 + 角色关联 + 岗位关联</td></tr>
+  <tr><td>角色权限</td><td><code>sys_role</code>, <code>sys_role_menu</code>, <code>sys_role_dept</code></td><td>RBAC：角色→菜单权限 + 数据权限</td></tr>
+  <tr><td>菜单管理</td><td><code>sys_menu</code></td><td>目录/菜单/按钮三级权限树，支持权限标识（如 <code>system:user:list</code>）</td></tr>
+  <tr><td>岗位管理</td><td><code>sys_post</code></td><td>岗位（董事长/项目经理/人力资源/普通员工）</td></tr>
+  <tr><td>字典管理</td><td><code>sys_dict_type</code>, <code>sys_dict_data</code></td><td>数据字典，类型 + 键值</td></tr>
+  <tr><td>参数配置</td><td><code>sys_config</code></td><td>系统级 key-value 参数</td></tr>
+  <tr><td>通知公告</td><td><code>sys_notice</code></td><td>系统通知</td></tr>
+  <tr><td>操作日志</td><td><code>sys_oper_log</code></td><td>用户操作审计</td></tr>
+  <tr><td>登录日志</td><td><code>sys_logininfor</code></td><td>登录记录/IP/时间</td></tr>
+  <tr><td>定时任务</td><td><code>sys_job</code>, <code>sys_job_log</code></td><td>任务定义 + 执行日志</td></tr>
+  <tr><td>代码生成</td><td><code>gen_table</code>, <code>gen_table_column</code></td><td>代码生成器配置</td></tr>
+</table>
+
+<h3>4.2 基础数据（bas_* — xzy-basics 模块）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>编码规则</td><td><code>bas_encoding_rules</code></td><td>自动编号规则：委托单(T开头)、检定(J开头)、样品(YP开头)、外检(W开头) 等</td></tr>
+  <tr><td>计量目录</td><td><code>bas_metering_directory</code></td><td>计量器具分类目录</td></tr>
+  <tr><td>计量项目</td><td><code>bas_meterage_item</code>, <code>bas_item_test_info</code></td><td>可开展的检测/校准项目 + 检测方式/周期</td></tr>
+  <tr><td>项目定价</td><td><code>bas_meterage_item_price</code></td><td>项目价格库</td></tr>
+  <tr><td>报价管理</td><td><code>bas_quoted_price</code>, <code>bas_quoted_price_detail</code></td><td>报价单主表 + 明细行</td></tr>
+  <tr><td>器具类别</td><td><code>bas_ware_cate</code></td><td>器具分类</td></tr>
+  <tr><td>标签模板</td><td><code>bas_label_template</code>, <code>bas_label_template_field</code></td><td>合格证标签模板 + 字段配置</td></tr>
+  <tr><td>外协单位</td><td><code>bas_external</code></td><td>外协检测机构（天溯/省计量院等）</td></tr>
+  <tr><td>本单位信息</td><td><code>sys_company</code></td><td>本公司基本信息</td></tr>
+</table>
+
+<h3>4.3 客户关系 CRM（crm_* — xzy-crm 模块）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>客户管理</td><td><code>crm_customer</code>, <code>crm_customer_cate</code></td><td>客户信息 + 分类</td></tr>
+  <tr><td>客户规则</td><td><code>crm_customer_rule</code></td><td>客户分配/跟进规则</td></tr>
+  <tr><td>送检台账</td><td><code>crm_give_check</code></td><td>客户送检记录</td></tr>
+  <tr><td>发票管理</td><td><code>crm_invoice_title</code></td><td>客户开票信息</td></tr>
+  <tr><td>行政区划</td><td><code>crm_division</code></td><td>地区数据</td></tr>
+  <tr><td>来样登记</td><td><code>crm_register_task</code>, <code>crm_sample_detail</code>, <code>crm_sample_info</code></td><td>来样任务 + 样品明细</td></tr>
+</table>
+
+<h3>4.4 委托业务（ms_entrust_* — xzy-measure 核心）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>委托登记</td><td><code>ms_entrust_task</code>, <code>ms_sample_info</code></td><td>检测/校准委托主表 + 样品信息</td></tr>
+  <tr><td>委托流转</td><td><code>ms_entrust_flow</code></td><td>状态流转记录（受理→任务→检测→审核→归档）</td></tr>
+  <tr><td>委托操作日志</td><td><code>ms_entrust_record</code></td><td>操作变更记录</td></tr>
+</table>
+
+<h3>4.5 任务分配与检测（test_* / ms_task_* — xzy-measure）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>人员任务</td><td><code>test_task_info</code></td><td>分配给检测人员的任务</td></tr>
+  <tr><td>任务分配</td><td><code>test_task_allot</code></td><td>分配记录</td></tr>
+  <tr><td>检测数据</td><td><code>test_master_info</code>（主表）+ <code>test_device_info</code>（器具）+ <code>test_standard_info</code>（标准）+ <code>test_technical_info</code>（技术依据）</td><td>记录编制四件套</td></tr>
+  <tr><td>证书管理</td><td><code>test_task_allot_archive</code>（归档）, <code>test_task_allot_record</code>（审核）, <code>ms_task_cert_number</code>（编号）</td><td>证书审核→归档全流程</td></tr>
+  <tr><td>任务预警</td><td><code>ms_task_warning_info</code></td><td>超期预警</td></tr>
+</table>
+
+<h3>4.6 模板管理（ms_template_* — xzy-measure）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>模板信息</td><td><code>ms_template_info</code>, <code>ms_template_classify</code>, <code>ms_template_child</code></td><td>主模板 + 分类 + 子模板</td></tr>
+  <tr><td>模板配置</td><td><code>ms_template_master_config</code>, <code>ms_template_device_config</code>, <code>ms_template_standard_config</code>, <code>ms_template_technical_config</code></td><td>四类配置：主配置/器具/标准/技术依据</td></tr>
+  <tr><td>模板记录</td><td><code>ms_template_record</code></td><td>操作记录</td></tr>
+</table>
+
+<h3>4.7 仪器设备管理（ms_device_*）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>设备台账</td><td><code>ms_device_library</code></td><td>仪器设备信息库</td></tr>
+  <tr><td>设备核查</td><td><code>ms_device_examine</code></td><td>核查记录</td></tr>
+  <tr><td>设备溯源</td><td><code>ms_device_trace_source</code>, <code>ms_device_trace_source_record</code></td><td>溯源管理 + 审核</td></tr>
+  <tr><td>样品库</td><td><code>sample_library_info</code></td><td>样品库信息</td></tr>
+</table>
+
+<h3>4.8 质量/计量标准（xzy-quality 模块）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>计量标准</td><td><code>ms_measure_standard</code>, <code>ms_measure_standard_item</code>, <code>ms_measure_standard_item_record</code></td><td>标准台账 + 覆盖项目 + 审核</td></tr>
+  <tr><td>标准物质</td><td><code>ms_standard_matter</code></td><td>标准物质管理</td></tr>
+  <tr><td>技术依据</td><td><code>qua_technical_basis</code>, <code>qua_technical_item</code></td><td>检定规程/校准规范 + 关联项目</td></tr>
+</table>
+
+<h3>4.9 外检业务（ms_outer_*）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>外检委托</td><td><code>ms_outer_entrust_task</code></td><td>现场/外检委托登记</td></tr>
+  <tr><td>外检任务</td><td><code>ms_outer_task</code>, <code>ms_outer_task_allot</code>, <code>ms_outer_task_detail</code>, <code>ms_outer_test_task_sample</code></td><td>任务 → 分配 → 明细 → 样品</td></tr>
+</table>
+
+<h3>4.10 特种设备检测（ms_special_*）</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>委托与任务</td><td><code>ms_special_entrust_task</code>, <code>ms_special_entrust_record</code>, <code>ms_special_entrust_sample_info</code>, <code>ms_special_test_task</code></td><td>特种设备委托→任务</td></tr>
+  <tr><td>全流程记录</td><td><code>ms_special_all_record</code></td><td>全流程数据</td></tr>
+  <tr><td>检查项目</td><td><code>ms_special_device</code>/<code>_appearan</code>/<code>_inside</code>/<code>_bottlen</code>/<code>_cylinder_valve</code>/<code>_water_method</code>/<code>_air_tightness</code>/<code>_accord_gas</code></td><td>8 类专项检查（装置/外观/内检/瓶口/瓶阀/水压/气密/气瓶）</td></tr>
+  <tr><td>报告与指令</td><td><code>ms_special_instruct</code>, <code>ms_special_aqf_report</code>, <code>ms_special_test_result</code></td><td>指令书 + 安全阀报告 + 检验结论</td></tr>
+  <tr><td>基础信息</td><td><code>ms_special_qp_org_info</code>, <code>ms_special_aqf_org_info</code></td><td>基础信息 + 安全阀信息</td></tr>
+</table>
+
+<h3>4.11 消息与通知</h3>
+<table>
+  <tr><th>功能</th><th>核心表</th><th>说明</th></tr>
+  <tr><td>企业微信</td><td><code>sys_corp_wx_message</code>, <code>sys_corp_wx_record</code></td><td>企微消息配置 + 发送记录</td></tr>
+  <tr><td>通知已读</td><td><code>sys_notice_read_record</code></td><td>通知公告已读跟踪</td></tr>
+  <tr><td>标签打印</td><td><code>ms_certok_label_print</code></td><td>合格证标签打印记录</td></tr>
+</table>
+
+<h2>5. 核心业务流程数据流</h2>
+<div class="diagram">委托登记（ms_entrust_task）→ 任务分配（test_task_allot）→ 人员任务（test_task_info）
+    ↓                                                     ↓
+  样品管理（ms_sample_info）                        检测数据录入
+    ↓                                             （test_master_info + device + standard + technical）
+  流转记录（ms_entrust_flow）                              ↓
+                                                        模板生成（ms_template_*）
+                                                            ↓
+                                                        证书审核（test_task_allot_record）
+                                                            ↓
+                                                        证书归档（test_task_allot_archive）
+</div>
+
+<h2>6. 前端视图与后端模块对应</h2>
+<table>
+  <tr><th>前端视图（src/views/）</th><th>对应后端模块</th><th>功能说明</th></tr>
+  <tr><td><code>system/</code></td><td>xzy-system</td><td>用户 / 角色 / 菜单 / 部门 / 岗位 / 字典 / 参数</td></tr>
+  <tr><td><code>monitor/</code></td><td>xzy-system</td><td>在线用户 / 操作日志 / 登录日志 / 服务监控</td></tr>
+  <tr><td><code>tool/</code></td><td>xzy-generator</td><td>代码生成 / 系统接口（Swagger）</td></tr>
+  <tr><td><code>basics/</code></td><td>xzy-basics</td><td>编码规则 / 计量目录 / 报价 / 标签模板 / 器具类别 / 外协</td></tr>
+  <tr><td><code>crm/</code></td><td>xzy-crm</td><td>客户 / 报价 / 送检台账 / 发票 / 来样登记</td></tr>
+  <tr><td><code>business/</code></td><td>xzy-measure</td><td>委托受理 / 流转 / 审核</td></tr>
+  <tr><td><code>taskallot/</code></td><td>xzy-measure</td><td>任务分配 / 检测 / 预警</td></tr>
+  <tr><td><code>sample/</code></td><td>xzy-measure</td><td>样品库管理</td></tr>
+  <tr><td><code>template/</code></td><td>xzy-measure</td><td>证书模板 / 记录模板 / 统计</td></tr>
+  <tr><td><code>quality/</code></td><td>xzy-quality</td><td>计量标准 / 标准物质 / 技术依据</td></tr>
+  <tr><td><code>certified/</code></td><td>xzy-measure</td><td>证书管理</td></tr>
+  <tr><td><code>establishment/</code></td><td>xzy-measure</td><td>证书 / 记录建立</td></tr>
+  <tr><td><code>sceneEntrust/</code></td><td>xzy-measure</td><td>外检 / 现场委托 / 预受理</td></tr>
+  <tr><td><code>siteDetection/</code></td><td>xzy-measure</td><td>现场检测</td></tr>
+  <tr><td><code>siteaudit/</code></td><td>xzy-measure</td><td>现场审核 / 归档 / 验证</td></tr>
+  <tr><td><code>ReviewManagement/</code></td><td>xzy-measure</td><td>审批管理 / 归档管理 / 验证管理</td></tr>
+  <tr><td><code>print/</code></td><td>xzy-measure</td><td>标签打印 / 证书打印</td></tr>
+  <tr><td><code>mobile/</code></td><td>xzy-measure</td><td>移动端防伪码查询</td></tr>
+</table>
+
+<h2>7. 快速入手建议</h2>
+<ol>
+  <li><strong>先读若依框架</strong>：从 <code>ry_20240629.sql</code> 入手，理解 <code>sys_*</code> 权限体系（用户→角色→菜单→部门），这是所有业务的前置基础</li>
+  <li><strong>再读基础数据</strong>：<code>lims</code> 库的 <code>bas_*</code> 表 — 编码规则/计量目录/报价/类别，是后续业务的字典和配置基础</li>
+  <li><strong>然后跟核心流程</strong>：
+    <ul>
+      <li>CRM 模块（<code>crm_customer</code> → <code>crm_give_check</code>）了解客户入口</li>
+      <li>委托模块（<code>ms_entrust_task</code>）了解业务发起</li>
+      <li>任务分配（<code>test_task_allot</code> → <code>test_task_info</code>）了解检测流转</li>
+      <li>模板配置（<code>ms_template_*</code>）了解证书/记录生成</li>
+      <li>审核归档（<code>test_task_allot_record</code> → <code>test_task_allot_archive</code>）了解闭环</li>
+    </ul>
+  </li>
+  <li><strong>最后看特种设备</strong>：<code>ms_special_*</code> 是独立子流程，体量大、检查项多，建议在掌握通用检测流程后再看</li>
+  <li><strong>前后端对照</strong>：查看 <code>xiziyi-lims-web/src/views/</code> 下的视图目录名，和 <code>xiziyi-lims-service/</code> 下的模块名保持对应，便于定位功能代码</li>
+</ol>
+
+<h2>8. 表命名规范速查</h2>
+<table>
+  <tr><th>前缀</th><th>所属模块</th><th>说明</th></tr>
+  <tr><td><code>sys_</code></td><td>若依框架</td><td>系统级：权限 / 字典 / 日志 / 任务 / 通知</td></tr>
+  <tr><td><code>bas_</code></td><td>基础数据</td><td>编码规则 / 目录 / 报价 / 标签 / 类别 / 外协</td></tr>
+  <tr><td><code>crm_</code></td><td>客户关系</td><td>客户 / 类别 / 规则 / 送检 / 发票 / 来样</td></tr>
+  <tr><td><code>ms_entrust_</code></td><td>委托业务</td><td>委托登记 / 流转 / 操作记录</td></tr>
+  <tr><td><code>ms_sample_</code></td><td>样品</td><td>样品信息</td></tr>
+  <tr><td><code>ms_template_</code></td><td>模板</td><td>模板信息 / 配置 / 分类</td></tr>
+  <tr><td><code>ms_device_</code></td><td>设备</td><td>设备台账 / 核查 / 溯源</td></tr>
+  <tr><td><code>ms_measure_</code></td><td>计量标准</td><td>标准管理 / 项目 / 审核</td></tr>
+  <tr><td><code>ms_standard_</code></td><td>标准物质</td><td>标准物质管理</td></tr>
+  <tr><td><code>ms_outer_</code></td><td>外检业务</td><td>外检委托 / 任务 / 明细 / 样品</td></tr>
+  <tr><td><code>ms_special_</code></td><td>特种设备</td><td>特种设备全流程 / 委托 / 检查项 / 报告</td></tr>
+  <tr><td><code>ms_task_</code></td><td>任务</td><td>预警 / 证书编号</td></tr>
+  <tr><td><code>test_</code></td><td>检测任务</td><td>任务分配 / 数据主表 / 器具标准技术数据 / 审核归档</td></tr>
+  <tr><td><code>qua_</code></td><td>质量</td><td>技术依据 / 关联项目</td></tr>
+  <tr><td><code>sample_library_</code></td><td>样品库</td><td>样品库信息</td></tr>
+  <tr><td><code>temp_</code></td><td>临时</td><td>临时导入数据（设备 / 标准物质）</td></tr>
+  <tr><td><code>gen_</code></td><td>代码生成</td><td>生成器配置</td></tr>
+</table>
+
+<div class="footer">
+  生成日期：2026-06-11 &nbsp;|&nbsp; 项目路径：/Users/sunnicholas/xiziyigit &nbsp;|&nbsp; 数据库文件：info/sql/
+</div>
+
+</body>
+</html>
